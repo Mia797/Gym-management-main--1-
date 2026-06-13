@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Calendar, CreditCard, ExternalLink, RefreshCw, Dumbbell, Apple } from 'lucide-react';
+import { Shield, Calendar, CreditCard, ExternalLink, RefreshCw, Dumbbell, Apple, CheckCircle2, Clock, TrendingUp, Zap } from 'lucide-react';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,13 +41,24 @@ function MySubscriptions() {
     }
   };
 
+  const getPlanTypeFeatures = (planType) => {
+    const features = [];
+    if (planType?.includes('gym') || planType === 'both') {
+      features.push({ icon: <Dumbbell size={14} />, label: 'Training Plan', color: '#ff7a00' });
+    }
+    if (planType?.includes('diet') || planType === 'both') {
+      features.push({ icon: <Apple size={14} />, label: 'Nutrition Plan', color: '#00e673' });
+    }
+    return features;
+  };
+
   return (
     <div className="profile-container text-white py-5 px-3 min-vh-100" style={{ background: '#0a0a0a' }}>
       <div className="max-width-lg mx-auto" style={{ maxWidth: '1000px' }}>
         <div className="d-flex align-items-center justify-content-between mb-5 border-bottom border-secondary border-opacity-15 pb-4">
           <div>
-            <h1 className="fw-black text-gradient display-6 mb-2">My Memberships</h1>
-            <p className="text-secondary small m-0">Track active memberships, status, specialist assignments, and active plans.</p>
+            <h1 className="fw-black text-gradient display-6 mb-2">My Plan</h1>
+            <p className="text-secondary small m-0">Track your active package, status, assigned specialists, and plan details in one place.</p>
           </div>
           <button 
             onClick={fetchMySubs} 
@@ -111,7 +122,8 @@ function MySubscriptions() {
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)'
                 }}
               >
-                <div className="row g-4 align-items-center">
+                {/* Header Section */}
+                <div className="row g-4 align-items-center mb-4">
                   <div className="col-12 col-md-5">
                     <span className="text-secondary small text-uppercase fw-bold d-block mb-1" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
                       Package Name
@@ -141,44 +153,97 @@ function MySubscriptions() {
                   </div>
                 </div>
 
-                {/* Assigned specialists & plans info */}
-                {(sub.trainer_name || sub.nutritionist_name || sub.training_plan_id || sub.nutrition_plan_id) && (
-                  <div className="row g-3 mt-3 pt-3 border-top border-secondary border-opacity-15">
-                    {sub.trainer_name && (
-                      <div className="col-12 col-sm-6">
-                        <span className="text-secondary small text-uppercase d-block" style={{ fontSize: '0.6rem' }}>Trainer</span>
-                        <span className="text-white small fw-bold">{sub.trainer_name}</span>
-                      </div>
-                    )}
-                    {sub.nutritionist_name && (
-                      <div className="col-12 col-sm-6">
-                        <span className="text-secondary small text-uppercase d-block" style={{ fontSize: '0.6rem' }}>Nutritionist</span>
-                        <span className="text-white small fw-bold">{sub.nutritionist_name}</span>
-                      </div>
-                    )}
-                    
-                    <div className="col-12 d-flex gap-3 mt-3">
-                      {sub.training_plan_id && (
-                        <button
-                          onClick={() => navigate(`/training/${sub.training_plan_id}`)}
-                          className="btn btn-outline-warning py-2 px-3 small d-flex align-items-center gap-2 hover-lift"
-                          style={{ borderRadius: '8px', fontSize: '0.8rem', border: '1px solid rgba(255, 122, 0, 0.4)' }}
-                        >
-                          <Dumbbell size={14} /> Training Program <ExternalLink size={12} />
-                        </button>
-                      )}
-                      {sub.nutrition_plan_id && (
-                        <button
-                          onClick={() => navigate(`/nutrition/${sub.nutrition_plan_id}`)}
-                          className="btn btn-outline-info py-2 px-3 small d-flex align-items-center gap-2 hover-lift"
-                          style={{ borderRadius: '8px', fontSize: '0.8rem', border: '1px solid rgba(0, 191, 255, 0.4)' }}
-                        >
-                          <Apple size={14} /> Nutrition Program <ExternalLink size={12} />
-                        </button>
-                      )}
+                <div className="border-top border-secondary border-opacity-15 pt-4">
+                  {/* Plan Type Benefits */}
+                  <div className="mb-4">
+                    <span className="text-secondary small text-uppercase fw-bold d-block mb-2" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+                      📦 What's Included
+                    </span>
+                    <div className="d-flex flex-wrap gap-2">
+                      {getPlanTypeFeatures(sub.plan_type).map((feature, i) => (
+                        <div key={i} className="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                          <span style={{ color: feature.color }}>{feature.icon}</span>
+                          <span className="text-white small fw-semibold">{feature.label}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
+
+                  {/* Assigned specialists & plans info */}
+                  {(sub.trainer_name || sub.nutritionist_name || sub.training_plan_id || sub.nutrition_plan_id) && (
+                    <div className="mb-4">
+                      <span className="text-secondary small text-uppercase fw-bold d-block mb-3" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
+                        👥 Your Assigned Specialists
+                      </span>
+                      <div className="row g-2">
+                        {sub.trainer_name && (
+                          <div className="col-12 col-sm-6">
+                            <div className="p-3 rounded-3" style={{ background: 'rgba(255, 122, 0, 0.05)', border: '1px solid rgba(255, 122, 0, 0.2)' }}>
+                              <div className="d-flex align-items-center gap-2 mb-2">
+                                <Dumbbell size={14} style={{ color: '#ff7a00' }} />
+                                <span className="text-secondary small text-uppercase" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Trainer</span>
+                              </div>
+                              <span className="text-white small fw-bold">{sub.trainer_name}</span>
+                            </div>
+                          </div>
+                        )}
+                        {sub.nutritionist_name && (
+                          <div className="col-12 col-sm-6">
+                            <div className="p-3 rounded-3" style={{ background: 'rgba(0, 230, 115, 0.05)', border: '1px solid rgba(0, 230, 115, 0.2)' }}>
+                              <div className="d-flex align-items-center gap-2 mb-2">
+                                <Apple size={14} style={{ color: '#00e673' }} />
+                                <span className="text-secondary small text-uppercase" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Nutritionist</span>
+                              </div>
+                              <span className="text-white small fw-bold">{sub.nutritionist_name}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="d-flex gap-2 flex-wrap">
+                    {sub.training_plan_id && (
+                      <button
+                        onClick={() => navigate(`/training/${sub.training_plan_id}`)}
+                        className="btn py-2 px-3 small d-flex align-items-center gap-2 hover-lift"
+                        style={{ 
+                          borderRadius: '8px', 
+                          fontSize: '0.8rem', 
+                          background: 'rgba(255, 122, 0, 0.1)',
+                          border: '1px solid rgba(255, 122, 0, 0.4)',
+                          color: '#ff7a00',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <Dumbbell size={14} /> View Training <ExternalLink size={12} />
+                      </button>
+                    )}
+                    {sub.nutrition_plan_id && (
+                      <button
+                        onClick={() => navigate(`/nutrition/${sub.nutrition_plan_id}`)}
+                        className="btn py-2 px-3 small d-flex align-items-center gap-2 hover-lift"
+                        style={{ 
+                          borderRadius: '8px', 
+                          fontSize: '0.8rem', 
+                          background: 'rgba(0, 230, 115, 0.1)',
+                          border: '1px solid rgba(0, 230, 115, 0.4)',
+                          color: '#00e673',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <Apple size={14} /> View Nutrition <ExternalLink size={12} />
+                      </button>
+                    )}
+                    {!sub.training_plan_id && !sub.nutrition_plan_id && (
+                      <div className="alert alert-warning alert-sm p-2 m-0 d-flex align-items-center gap-2" style={{ fontSize: '0.8rem', borderRadius: '8px' }}>
+                        <Clock size={14} />
+                        <span>Plans pending assignment</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>

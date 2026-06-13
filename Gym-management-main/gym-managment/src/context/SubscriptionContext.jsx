@@ -41,11 +41,16 @@ export const SubscriptionProvider = ({ children }) => {
     }
   };
 
-  const purchase = async (planId, paymentMethod = 'wallet') => {
+  const purchase = async (planId, goal = '', description = '') => {
     setLoading(true);
     try {
-      const response = await purchaseSubscription({ planId, paymentMethod });
-      if (response.data && response.data.success) {
+      const payload = {
+        plan_id: planId,
+        goal: goal || 'General Fitness',
+        description: description || 'Standard membership'
+      };
+      const response = await purchaseSubscription(payload);
+      if (response.data && (response.data.success || response.data.subscription_id || response.data.message)) {
         toast.success('Subscription purchased successfully!');
         await fetchMySubs();
         await refreshUser(); // Update balance if paid from wallet

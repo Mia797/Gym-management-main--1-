@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, Dumbbell, Apple, Trash2, Edit2, User, ChevronRight, AlertCircle, Compass, Sparkles, CheckCircle2, TrendingUp, Activity } from 'lucide-react';
+import { Calendar, Clock, Dumbbell, Apple, Trash2, Edit2, User, ChevronRight, AlertCircle, Compass, Sparkles, CheckCircle2, TrendingUp, Activity, Shield } from 'lucide-react';
 import { Modal, Button, Form, Badge } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSubscription } from '../../context/SubscriptionContext';
 
 // Default Sample Scheduled Sessions to show if localStorage is empty
 const SAMPLE_SESSIONS = [
@@ -49,6 +50,7 @@ const SAMPLE_SESSIONS = [
 
 function MySessions() {
   const { user } = useAuth();
+  const { mySubs, fetchMySubs } = useSubscription();
   const navigate = useNavigate();
 
   // State
@@ -86,6 +88,8 @@ function MySessions() {
     setBookedTrainers(JSON.parse(localStorage.getItem('bookedTrainers') || '[]'));
     setBookedNutritionists(JSON.parse(localStorage.getItem('bookedNutritionists') || '[]'));
     setBookedMachines(JSON.parse(localStorage.getItem('bookedMachines') || '[]'));
+
+    fetchMySubs();
   }, [user]);
 
   // Cancel a Session
@@ -199,29 +203,64 @@ function MySessions() {
           </button>
         </div>
 
+        {/* My Plan Quick Card */}
+        <div className="p-4 rounded-4 border border-secondary border-opacity-10 mb-5" style={{ background: 'rgba(255, 122, 0, 0.05)', backdropFilter: 'blur(8px)' }}>
+          <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+              <div className="d-flex align-items-center gap-2 mb-2 text-warning text-uppercase fw-black" style={{ letterSpacing: '1px', fontSize: '0.72rem' }}>
+                <Shield size={14} /> My Plan
+              </div>
+              {mySubs.length > 0 ? (
+                <>
+                  <h3 className="fw-black text-white mb-1">{mySubs[0].plan_name || 'Active Package'}</h3>
+                  <p className="text-secondary small mb-0">Status: {mySubs[0].status || 'Active'} • {mySubs[0].trainer_name ? `Trainer: ${mySubs[0].trainer_name}` : 'Trainer pending'} • {mySubs[0].nutritionist_name ? `Nutritionist: ${mySubs[0].nutritionist_name}` : 'Nutritionist pending'}</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="fw-black text-white mb-1">No plan yet</h3>
+                  <p className="text-secondary small mb-0">Choose a package to unlock your training plan and nutrition details here.</p>
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => navigate('/my-subscriptions')}
+              className="btn btn-warning btn-sm fw-bold text-uppercase py-2 px-3"
+              style={{ borderRadius: '8px', background: 'linear-gradient(135deg, #ff7a00 0%, #ff4400 100%)', color: '#000', border: 'none' }}
+            >
+              View Full Plan
+            </button>
+          </div>
+        </div>
+
         {/* Quick Stats Grid */}
         <div className="row g-3 mb-5">
-          <div className="col-6 col-md-3">
+          <div className="col-6 col-md-2">
             <div className="p-3 rounded-3 border border-secondary border-opacity-10 text-center" style={{ background: 'rgba(255,255,255,0.01)' }}>
-              <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Total Bookings</span>
+              <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Sessions</span>
               <span className="fs-3 fw-black text-white">{scheduledSessions.length}</span>
             </div>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-6 col-md-2">
             <div className="p-3 rounded-3 border border-secondary border-opacity-10 text-center" style={{ background: 'rgba(255,255,255,0.01)' }}>
               <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Upcoming</span>
               <span className="fs-3 fw-black text-warning">{upcomingSessions.length}</span>
             </div>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-6 col-md-2">
             <div className="p-3 rounded-3 border border-secondary border-opacity-10 text-center" style={{ background: 'rgba(255,255,255,0.01)' }}>
               <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Completed</span>
               <span className="fs-3 fw-black text-success">{pastSessions.length}</span>
             </div>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-6 col-md-2">
             <div className="p-3 rounded-3 border border-secondary border-opacity-10 text-center" style={{ background: 'rgba(255,255,255,0.01)' }}>
-              <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Gym Specialists</span>
+              <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Machines</span>
+              <span className="fs-3 fw-black text-warning">{bookedMachines.length}</span>
+            </div>
+          </div>
+          <div className="col-6 col-md-2">
+            <div className="p-3 rounded-3 border border-secondary border-opacity-10 text-center" style={{ background: 'rgba(255,255,255,0.01)' }}>
+              <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>Specialists</span>
               <span className="fs-3 fw-black text-info">{bookedTrainers.length + bookedNutritionists.length}</span>
             </div>
           </div>
@@ -395,6 +434,86 @@ function MySessions() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* My Booked Machines Section */}
+        <div className="pt-4 border-top border-secondary border-opacity-15 mb-5">
+          <h3 className="fw-black mb-4 d-flex align-items-center gap-2 text-uppercase fs-5" style={{ letterSpacing: '1px' }}>
+            <Dumbbell size={20} /> My Booked Machines
+          </h3>
+          
+          {bookedMachines.length === 0 ? (
+            <div className="p-4 rounded-4 border border-secondary border-opacity-10 text-center" style={{ background: 'rgba(255,255,255,0.01)' }}>
+              <p className="text-secondary small mb-3">You haven't booked any machines yet.</p>
+              <button onClick={() => navigate('/machines')} className="btn btn-warning btn-sm fw-bold text-uppercase py-2 px-4" style={{ borderRadius: '8px', fontSize: '0.72rem', background: 'linear-gradient(135deg, #ff7a00 0%, #ff4400 100%)', color: '#000', border: 'none' }}>
+                Browse Machines
+              </button>
+            </div>
+          ) : (
+            <div className="row g-3">
+              {bookedMachines.map((machine, idx) => (
+                <div key={machine.id || idx} className="col-12 col-md-6">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="p-4 rounded-4 h-100"
+                    style={{
+                      background: 'rgba(255, 122, 0, 0.05)',
+                      border: '1px solid rgba(255, 122, 0, 0.2)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <div className="d-flex gap-3">
+                      {machine.image_url && (
+                        <img 
+                          src={machine.image_url} 
+                          alt={machine.name}
+                          style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover', border: '2px solid rgba(255, 122, 0, 0.3)' }}
+                        />
+                      )}
+                      <div className="flex-grow-1 d-flex flex-column justify-content-between">
+                        <div>
+                          <h5 className="text-white fw-black mb-2">{machine.name}</h5>
+                          <div className="d-flex flex-column gap-1 small text-secondary">
+                            <span className="d-flex align-items-center gap-1.5">
+                              <Calendar size={12} className="text-warning" />
+                              {formatDate(machine.bookingTime?.split(' ')[0])}
+                            </span>
+                            <span className="d-flex align-items-center gap-1.5">
+                              <Clock size={12} className="text-warning" />
+                              {machine.bookingTime?.split(' ').slice(1).join(' ')}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="d-flex gap-2 mt-3">
+                          <button
+                            onClick={() => {
+                              const updated = bookedMachines.filter(m => m.id !== machine.id);
+                              setBookedMachines(updated);
+                              localStorage.setItem('bookedMachines', JSON.stringify(updated));
+                              toast.success(`Cancelled booking for ${machine.name}`);
+                            }}
+                            className="btn btn-outline-danger btn-sm px-3 py-1"
+                            style={{ borderRadius: '6px', fontSize: '0.7rem' }}
+                          >
+                            <Trash2 size={12} className="me-1" /> Cancel
+                          </button>
+                          <button
+                            onClick={() => navigate('/machines')}
+                            className="btn btn-outline-warning btn-sm px-3 py-1"
+                            style={{ borderRadius: '6px', fontSize: '0.7rem', color: '#ff7a00', borderColor: '#ff7a00' }}
+                          >
+                            <Edit2 size={12} className="me-1" /> Reschedule
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* My Specialists / Assigned Section */}

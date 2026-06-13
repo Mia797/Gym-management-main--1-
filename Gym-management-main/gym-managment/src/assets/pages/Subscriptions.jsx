@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Flame, Award, Shield, Sparkles } from 'lucide-react';
+import { Check, Flame, Award, Shield, Sparkles, X } from 'lucide-react';
+import { Modal, Form, Button } from 'react-bootstrap';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { useWallet } from '../../context/WalletContext';
 import { toast } from 'react-toastify';
@@ -11,22 +12,51 @@ function Subscriptions() {
   const { balance } = useWallet();
   const navigate = useNavigate();
 
+  // Goal Modal State
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [goal, setGoal] = useState('');
+  const [description, setDescription] = useState('');
+  const [purchasingLoading, setPurchasingLoading] = useState(false);
+
   useEffect(() => {
     fetchCatalog();
   }, []);
 
-  const handlePurchase = async (plan) => {
+  const handlePurchaseClick = (plan) => {
     if (balance < parseFloat(plan.price)) {
       toast.error(`Insufficient wallet balance. You need $${plan.price} but have $${balance}. Please fund your wallet.`);
       navigate('/wallet');
       return;
     }
+    
+    setSelectedPlan(plan);
+    setGoal('');
+    setDescription('');
+    setShowGoalModal(true);
+  };
 
-    if (confirm(`Are you sure you want to purchase the "${plan.name}" plan for $${plan.price}?`)) {
-      const result = await purchase(plan.id);
-      if (result.success) {
-        navigate('/my-subscriptions');
-      }
+  const handleConfirmPurchase = async (e) => {
+    e.preventDefault();
+    
+    if (!goal.trim()) {
+      toast.error('Please select a fitness goal');
+      return;
+    }
+    
+    if (!description.trim()) {
+      toast.error('Please add a description of your fitness goals');
+      return;
+    }
+
+    setPurchasingLoading(true);
+    const result = await purchase(selectedPlan.id, goal, description);
+    setPurchasingLoading(false);
+
+    if (result.success) {
+      setShowGoalModal(false);
+      toast.success('Subscription successful! Opening your plan now.');
+      navigate('/my-subscriptions', { replace: true });
     }
   };
 
@@ -175,7 +205,7 @@ function Subscriptions() {
                 </div>
 
                 <button
-                  onClick={() => handlePurchase(plan)}
+                  onClick={() => handlePurchaseClick(plan)}
                   className="btn btn-warning w-100 py-3 fw-black text-uppercase border-0 hover-lift"
                   style={{
                     borderRadius: '12px',
@@ -192,8 +222,115 @@ function Subscriptions() {
           ))}
         </motion.div>
       )}
+
+      {/* Goal Selection Modal */}
+      <Modal 
+        show={showGoalModal} 
+        onHide={() => !purchasingLoading && setShowGoalModal(false)} 
+        centered
+        contentClassName="bg-dark border-0 overflow-hidden shadow-lg"
+        style={{ boxShadow: '0 25px 50px -12px rgba(255, 145, 0, 0.25)' }}
+      >
+        <Modal.Header closeButton closeVariant="white" className="border-0 p-4" style={{ backgroundColor: 'var(--accent-primary)' }}>
+          <Modal.Title className="text-uppercase fw-black text-white" style={{ letterSpacing: '2px', fontSize: '1.1rem' }}>
+            Define Your Fitness Goal
+          </Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleConfirmPurchase}>
+          <Modal.Body className="p-4 bg-dark">
+            {selectedPlan && (
+              <div className="d-flex flex-column gap-4">
+                <div className="p-3 rounded-3" style={{ background: 'rgba(255, 122, 0, 0.05)', border: '1px solid rgba(255, 122, 0, 0.2)' }}>
+                  <span className="text-secondary small text-uppercase d-block mb-1" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>Purchasing Plan</span>
+                  <h5 className="text-white fw-bold mb-1">{selectedPlan.name}</h5>
+                  <span className="text-warning fw-bold">${selectedPlan.price}</span>
+                </div>
+
+                <Form.Group>
+                  <Form.Label className="text-white fw-bold mb-2 text-uppercase" style={{ fontSize: '0.85rem', letterSpacing: '1px' }}>
+                    Primary Fitness Goal *
+                  </Form.Label>
+                  <Form.Select
+                    value={goal}
+                    onChange={(e) => setGoal(e.target.value)}
+                    className="form-select-dark"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 122, 0, 0.3)',
+                      color: '#fff',
+                      borderRadius: '8px',
+                      padding: '10px 12px'
+                    }}
+                  >
+                    <option value="">Select a goal...</option>
+                    <option value="Weight Loss">Weight Loss</option>
+                    <option value="Weight Gain">Weight Gain</option>
+                    <option value="Muscle Gain">Muscle Gain</option>
+                    <option value="General Fitness">General Fitness</option>
+                    <option value="Strength Training">Strength Training</option>
+                    <option value="Endurance">Endurance</option>
+                    <option value="Flexibility">Flexibility</option>
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group>
+                  <Form.Label className="text-white fw-bold mb-2 text-uppercase" style={{ fontSize: '0.85rem', letterSpacing: '1px' }}>
+                    Describe Your Fitness Objectives *
+                  </Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    placeholder="e.g., Build muscle mass, focus on upper body strength and 4-week transformation..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 122, 0, 0.3)',
+                      color: '#fff',
+                      borderRadius: '8px',
+                      padding: '10px 12px'
+                    }}
+                  />
+                </Form.Group>
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer className="border-0 p-4 bg-dark border-top border-secondary border-opacity-10 d-flex gap-2">
+            <Button 
+              variant="link" 
+              onClick={() => setShowGoalModal(false)} 
+              className="text-white opacity-50 text-decoration-none fw-bold text-uppercase small me-auto"
+              disabled={purchasingLoading}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="warning" 
+              type="submit"
+              className="fw-black text-uppercase text-dark border-0"
+              style={{
+                background: 'linear-gradient(135deg, #ff7a00 0%, #ff4400 100%)',
+                padding: '10px 24px',
+                borderRadius: '8px',
+                letterSpacing: '1px'
+              }}
+              disabled={purchasingLoading}
+            >
+              {purchasingLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Processing...
+                </>
+              ) : (
+                'Confirm Purchase'
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </div>
   );
 }
 
 export default Subscriptions;
+
