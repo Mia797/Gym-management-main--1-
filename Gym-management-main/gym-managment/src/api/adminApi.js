@@ -2,7 +2,13 @@
 import api from './axios';
 
 // Get admin dashboard stats and recent activities
-export const getAdminDashboard = () => api.get('/admin/dashboard');
+export const getAdminDashboard = (user) =>
+  api.get('/admin/dashboard', {
+    headers: {
+      'x-user-id': user?.id,
+      'x-role': user?.role
+    }
+  });
 
 // Assign a trainer to a user's subscription plan
 export const assignTrainer = (subscriptionId, trainerId) =>
@@ -25,6 +31,9 @@ export const deleteSubscription = (planId) =>
 // Equipment / Machines CRUD
 export const createEquipment = (equipmentData) =>
   api.post('/equipment/create', equipmentData);
+
+export const updateEquipment = (equipmentData) =>
+  api.post('/equipment/update', equipmentData);
 
 export const deleteEquipment = (equipmentId) =>
   api.post('/equipment/delete', { equipmentId });

@@ -15,7 +15,7 @@ export const WalletProvider = ({ children }) => {
     if (!user) return;
     setLoading(true);
     try {
-      const response = await getWalletHistory();
+      const response = await getWalletHistory(user);
       if (response.data) {
         setBalance(response.data.balance || 0);
         setTransactions(response.data.history || response.data.transactions || []);
@@ -30,7 +30,7 @@ export const WalletProvider = ({ children }) => {
   const deposit = async (amount) => {
     setLoading(true);
     try {
-      const response = await depositFunds(amount);
+      const response = await depositFunds(amount, user);
       if (response.data && response.data.success) {
         toast.success(`Successfully deposited $${amount}!`);
         await fetchHistory();
