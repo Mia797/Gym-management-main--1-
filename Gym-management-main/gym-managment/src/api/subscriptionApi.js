@@ -9,3 +9,7 @@ export const purchaseSubscription = (payload) => api.post('/subscriptions/purcha
 
 // Get the logged‑in user's subscriptions with status
 export const getUserSubscriptions = () => api.get('/subscriptions/user');
+
+// Admin: create a new subscription plan
+export const createSubscriptionPlan = (payload) =>
+  api.post('/subscriptions/create', payload);

@@ -1,10 +1,31 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+const AUTH_USER_STORAGE_KEY = 'goldfit_auth_user';
+const USE_MOCK_AUTH = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
+});
+
+api.interceptors.request.use((config) => {
+  if (!USE_MOCK_AUTH) {
+    return config;
+  }
+
+  try {
+    const storedUser = JSON.parse(window.localStorage.getItem(AUTH_USER_STORAGE_KEY) || 'null');
+    if (storedUser?.id) {
+      config.headers['x-user-id'] = String(storedUser.id);
+      config.headers['x-role'] = storedUser.role || 'user';
+    }
+  } catch (error) {
+    console.error('Failed to read saved auth user:', error);
+  }
+
+  return config;
 });
 
 // Response interceptor — handle 401 globally

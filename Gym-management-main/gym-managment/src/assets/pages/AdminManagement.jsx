@@ -5,15 +5,16 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import {
-  createSubscription,
   updateSubscription,
   deleteSubscription,
   createEquipment,
   deleteEquipment,
   createSpecialist,
-  deleteSpecialist,
+  deleteTrainer,
+  deleteNutritionist,
   deleteUser
 } from '../../api/adminApi';
+import { createSubscriptionPlan } from '../../api/subscriptionApi';
 import { toast } from 'react-toastify';
 
 function AdminManagement() {
@@ -131,16 +132,27 @@ function AdminManagement() {
     if (!subForm.name.trim() || !subForm.price) return;
     
     try {
+      const planType =
+        subForm.plan_type ||
+        (subForm.has_trainer && subForm.has_nutritionist
+          ? 'both'
+          : subForm.has_trainer
+            ? 'gym'
+            : subForm.has_nutritionist
+              ? 'diet'
+              : 'both');
+
       const payload = {
         name: subForm.name,
         price: parseFloat(subForm.price),
         duration_days: parseInt(subForm.duration_days),
         description: subForm.description,
+        plan_type: planType,
         has_trainer: subForm.has_trainer ? 1 : 0,
         has_nutritionist: subForm.has_nutritionist ? 1 : 0
       };
       
-      const res = await createSubscription(payload);
+      const res = await createSubscriptionPlan(payload);
       if (res.data && res.data.success) {
         toast.success('Subscription plan created!');
         setSubForm({ name: '', price: '', duration_days: '30', description: '', has_trainer: false, has_nutritionist: false, plan_type: 'both' });
@@ -206,10 +218,11 @@ function AdminManagement() {
     }
   };
 
-  const handleDeleteSpec = async (id) => {
+  const handleDeleteSpec = async (spec) => {
     if (!confirm('Are you sure you want to delete this specialist account?')) return;
     try {
-      const res = await deleteSpecialist(id);
+      const deleteRequest = spec.role === 'nutritionist' ? deleteNutritionist : deleteTrainer;
+      const res = await deleteRequest(spec.id);
       if (res.data && res.data.success) {
         toast.success('Specialist account deleted.');
         fetchSpecialists();
@@ -377,7 +390,7 @@ function AdminManagement() {
                           <strong className="text-white d-block">{spec.name}</strong>
                           <span className="text-secondary small d-block mt-0.5" style={{ fontSize: '0.75rem' }}>Role: <span className="text-warning text-uppercase">{spec.role}</span> | {spec.email}</span>
                         </div>
-                        <button onClick={() => handleDeleteSpec(spec.id)} className="btn btn-link text-danger p-2 hover-lift"><Trash2 size={16} /></button>
+                        <button onClick={() => handleDeleteSpec(spec)} className="btn btn-link text-danger p-2 hover-lift"><Trash2 size={16} /></button>
                       </div>
                     ))
                   )

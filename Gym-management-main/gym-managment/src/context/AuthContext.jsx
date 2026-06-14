@@ -5,6 +5,42 @@ import axios from 'axios';
 // axios.defaults.baseURL = 'https://test.oralpharm.com'; // Removed to use Vite proxy
 axios.defaults.withCredentials = true;
 
+const AUTH_USER_STORAGE_KEY = 'goldfit_auth_user';
+const USE_MOCK_AUTH = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
+
+const normalizeUser = (user) => {
+  if (!user?.id) return null;
+
+  return {
+    ...user,
+    role: user.role_name || user.role || 'user',
+    firstName: user.name ? user.name.split(' ')[0] : '',
+  };
+};
+
+const syncAuthState = (authUser) => {
+  if (!USE_MOCK_AUTH) {
+    if (authUser?.id) {
+      window.localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(authUser));
+      return;
+    }
+
+    window.localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+    return;
+  }
+
+  if (authUser?.id) {
+    axios.defaults.headers.common['x-user-id'] = String(authUser.id);
+    axios.defaults.headers.common['x-role'] = authUser.role || 'user';
+    window.localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(authUser));
+    return;
+  }
+
+  delete axios.defaults.headers.common['x-user-id'];
+  delete axios.defaults.headers.common['x-role'];
+  window.localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+};
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -14,16 +50,31 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Attempt to fetch profile on load to check if session is valid
     const checkSession = async () => {
+      let storedUser = null;
+
+      try {
+        storedUser = normalizeUser(JSON.parse(window.localStorage.getItem(AUTH_USER_STORAGE_KEY) || 'null'));
+      } catch (error) {
+        console.error('Failed to read saved auth user:', error);
+      }
+
+      if (storedUser) {
+        syncAuthState(storedUser);
+        setUser(storedUser);
+      }
+
       try {
         const response = await axios.get('/api/auth/profile');
         if (response.data && response.data.user && response.data.user.id) {
-          const loggedInUser = response.data.user;
-          loggedInUser.role = loggedInUser.role_name || 'user';
-          loggedInUser.firstName = loggedInUser.name ? loggedInUser.name.split(' ')[0] : '';
+          const loggedInUser = normalizeUser(response.data.user);
+          syncAuthState(loggedInUser);
           setUser(loggedInUser);
         }
       } catch (error) {
-        setUser(null);
+        if (!storedUser) {
+          syncAuthState(null);
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -36,9 +87,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get('/api/auth/profile');
       if (response.data && response.data.user && response.data.user.id) {
-        const loggedInUser = response.data.user;
-        loggedInUser.role = loggedInUser.role_name || 'user';
-        loggedInUser.firstName = loggedInUser.name ? loggedInUser.name.split(' ')[0] : '';
+        const loggedInUser = normalizeUser(response.data.user);
+        syncAuthState(loggedInUser);
         setUser(loggedInUser);
       }
     } catch (error) {
@@ -54,16 +104,11 @@ export const AuthProvider = ({ children }) => {
         password
       });
 
-      if (response.data && response.data.message === 'Login successful') {
-        // Fetch profile to get user details
-        const profileResponse = await axios.get('/api/auth/profile');
-        if (profileResponse.data && profileResponse.data.user && profileResponse.data.user.id) {
-          const loggedInUser = profileResponse.data.user;
-          loggedInUser.role = loggedInUser.role_name || 'user';
-          loggedInUser.firstName = loggedInUser.name ? loggedInUser.name.split(' ')[0] : '';
+      if (response.data && response.data.message === 'Login successful' && response.data.user?.id) {
+          const loggedInUser = normalizeUser(response.data.user);
+          syncAuthState(loggedInUser);
           setUser(loggedInUser);
           return { success: true };
-        }
       }
       return { success: false, message: response.data?.message || 'Login failed' };
     } catch (error) {
@@ -114,6 +159,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      syncAuthState(null);
       setUser(null);
     }
   };
