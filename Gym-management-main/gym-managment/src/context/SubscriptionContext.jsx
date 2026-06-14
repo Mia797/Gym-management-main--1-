@@ -30,7 +30,7 @@ export const SubscriptionProvider = ({ children }) => {
     if (!user) return;
     setLoading(true);
     try {
-      const response = await getUserSubscriptions();
+      const response = await getUserSubscriptions(user);
       if (response.data) {
         setMySubs(response.data.subscriptions || response.data.userSubscriptions || (Array.isArray(response.data) ? response.data : []));
       }
@@ -49,7 +49,7 @@ export const SubscriptionProvider = ({ children }) => {
         goal: goal || 'General Fitness',
         description: description || 'Standard membership'
       };
-      const response = await purchaseSubscription(payload);
+      const response = await purchaseSubscription(payload, user);
       if (response.data && (response.data.success || response.data.subscription_id || response.data.message)) {
         toast.success('Subscription purchased successfully!');
         await fetchMySubs();

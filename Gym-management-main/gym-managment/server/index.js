@@ -18,7 +18,10 @@ app.use((req, res, next) => {
 });
 
 // In‑memory store for demo purposes
-const users = [];
+const users = [
+  { id: 1, name: 'Demo User', email: 'user@goldfit.local', password: 'password', balance: 500, role: 'user', createdAt: new Date() },
+  { id: 2, name: 'Admin User', email: 'admin@goldfit.local', password: 'password', balance: 0, role: 'admin', createdAt: new Date() }
+];
 let specialistProfile = {
   bio: 'Certified specialist in high-performance programs.',
   experience_years: 5,
@@ -384,7 +387,8 @@ const subscriptionPlans = [
   }
 ];
 
-const userSubscriptions = []; // { userId, planId, status, trainingPlanId, dietPlanId }
+const userSubscriptions = []; // { id, userId, planId, planName, amount, status, trainingPlanId, dietPlanId }
+const walletTransactions = [];
 
 // Helper to extract user info from headers (simple auth mock)
 function getUser(req) {
@@ -396,6 +400,45 @@ function getUser(req) {
 // GET all subscription plans (public)
 app.get('/api/subscriptions', (req, res) => {
   res.json({ success: true, subscriptions: subscriptionPlans });
+});
+
+app.get('/api/payments/history', (req, res) => {
+  const { userId } = getUser(req);
+  if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+  const user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  res.json({
+    success: true,
+    balance: user.balance || 0,
+    transactions: walletTransactions.filter(tx => tx.userId === userId)
+  });
+});
+
+app.post('/api/payments/deposit', (req, res) => {
+  const { userId } = getUser(req);
+  if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+  const amount = Number(req.body.amount);
+  if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid deposit amount' });
+
+  const user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  user.balance = (Number(user.balance) || 0) + amount;
+  const transaction = {
+    id: walletTransactions.length ? walletTransactions[walletTransactions.length - 1].id + 1 : 1,
+    userId,
+    user_email: user.email,
+    description: 'Wallet deposit',
+    type: 'deposit',
+    amount,
+    created_at: new Date()
+  };
+  walletTransactions.push(transaction);
+
+  res.json({ success: true, balance: user.balance, transaction });
 });
 
 // Purchase a subscription plan (any logged‑in user)
@@ -410,17 +453,86 @@ app.post('/api/subscriptions/purchase', (req, res) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
   if (user.balance < plan.price) return res.status(400).json({ error: 'Insufficient balance' });
   user.balance -= plan.price;
-  const newSub = {
+  walletTransactions.push({
+    id: walletTransactions.length ? walletTransactions[walletTransactions.length - 1].id + 1 : 1,
     userId,
+    user_email: user.email,
+    description: `${plan.name} purchase`,
+    type: 'purchase',
+    amount: Number(plan.price) || 0,
+    created_at: new Date()
+  });
+  const newSub = {
+    id: userSubscriptions.length ? userSubscriptions[userSubscriptions.length - 1].id + 1 : 1,
+    userId,
+    userName: user.name,
+    userEmail: user.email,
     planId: plan.id,
+    planName: plan.name,
+    amount: Number(plan.price) || 0,
     status: 'Pending Assign',
     goal,
     description,
+    purchasedAt: new Date(),
     trainingPlanId: plan.plan_type === 'gym' || plan.plan_type === 'both' ? Date.now() + Math.random() : null,
-    dietPlanId: plan.plan_type === 'diet' || plan.plan_type === 'both' ? Date.now() + Math.random() : null
+    dietPlanId: plan.plan_type === 'diet' || plan.plan_type === 'both' ? Date.now() + Math.random() : null,
+    trainerId: null,
+    nutritionistId: null
   };
   userSubscriptions.push(newSub);
   res.json({ success: true, subscription: newSub });
+});
+
+// Admin-only dashboard summary
+app.get('/api/admin/dashboard', (req, res) => {
+  const { role } = getUser(req);
+  if (role !== 'admin') return res.status(403).json({ error: 'Admin required' });
+
+  const revenue = userSubscriptions.reduce((total, subscription) => {
+    const plan = subscriptionPlans.find(p => p.id === subscription.planId);
+    const amount = subscription.amount ?? plan?.price ?? 0;
+    return total + (Number(amount) || 0);
+  }, 0);
+
+  const activeSubscriptions = userSubscriptions.filter(subscription =>
+    ['active', 'pending assign', 'pending'].includes(String(subscription.status).toLowerCase())
+  );
+
+  const pendingAssignments = userSubscriptions
+    .filter(subscription => String(subscription.status).toLowerCase() === 'pending assign')
+    .map(subscription => {
+      const plan = subscriptionPlans.find(p => p.id === subscription.planId);
+      const planType = plan?.plan_type || 'both';
+
+      return {
+        id: subscription.id,
+        subscription_id: subscription.id,
+        user_id: subscription.userId,
+        user_name: subscription.userName || 'Gym Member',
+        plan_name: subscription.planName || plan?.name || 'Subscription Plan',
+        has_trainer: planType === 'gym' || planType === 'both' ? 1 : 0,
+        has_nutritionist: planType === 'diet' || planType === 'both' ? 1 : 0,
+        trainer_id: subscription.trainerId,
+        nutritionist_id: subscription.nutritionistId
+      };
+    });
+
+  const transactions = userSubscriptions.map(subscription => ({
+    id: subscription.id,
+    user_email: subscription.userEmail || 'member@goldfit.local',
+    description: `${subscription.planName || 'Subscription'} purchase`,
+    type: 'purchase',
+    amount: subscription.amount || 0,
+    created_at: subscription.purchasedAt
+  }));
+
+  res.json({
+    revenue,
+    active_subscriptions: activeSubscriptions.length,
+    equipment_utilization: 0,
+    pending_assignments: pendingAssignments,
+    transactions
+  });
 });
 
 // Get current user's subscriptions (any logged‑in user)
@@ -512,14 +624,6 @@ app.post('/api/subscriptions/ai-plan', async (req, res) => {
   };
   res.json({ success: true, data: mockResponse });
 });
-
-// Ensure users array exists for mock balance handling
-if (typeof users === 'undefined') {
-  var users = [
-    { id: 1, name: 'Demo User', balance: 500, role: 'user' },
-    { id: 2, name: 'Admin User', balance: 0, role: 'admin' }
-  ];
-}
 
 app.listen(PORT, () => {
   console.log(`Backend server listening on http://localhost:${PORT}`);

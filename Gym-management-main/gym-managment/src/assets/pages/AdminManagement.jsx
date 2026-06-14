@@ -8,6 +8,7 @@ import {
   updateSubscription,
   deleteSubscription,
   createEquipment,
+  updateEquipment,
   deleteEquipment,
   createSpecialist,
   deleteTrainer,
@@ -30,7 +31,8 @@ function AdminManagement() {
   const [specialists, setSpecialists] = useState([]);
   
   // Forms state
-  const [equipmentForm, setEquipmentForm] = useState({ name: '', description: '', status: 'available' });
+  const [editingEquipment, setEditingEquipment] = useState(null);
+  const [equipmentForm, setEquipmentForm] = useState({ name: '', description: '', status: 'available', booking_price: '25' });
   const [subForm, setSubForm] = useState({ name: '', price: '', duration_days: '30', description: '', has_trainer: false, has_nutritionist: false, plan_type: 'both' });
   const [editingSub, setEditingSub] = useState(null);
   const [specForm, setSpecForm] = useState({ name: '', email: '', password: '', role_name: 'trainer', phone: '', bio: '' });
@@ -101,17 +103,36 @@ function AdminManagement() {
   const handleAddEquipment = async (e) => {
     e.preventDefault();
     if (!equipmentForm.name.trim()) return;
-    
+
     try {
-      const res = await createEquipment(equipmentForm);
+      const payload = {
+        ...equipmentForm,
+        booking_price: Number(equipmentForm.booking_price) || 0
+      };
+
+      const res = editingEquipment
+        ? await updateEquipment({ id: editingEquipment.id, ...payload })
+        : await createEquipment(payload);
+
       if (res.data && res.data.success) {
-        toast.success('Equipment registered successfully!');
-        setEquipmentForm({ name: '', description: '', status: 'available' });
+        toast.success(editingEquipment ? 'Equipment updated successfully!' : 'Equipment registered successfully!');
+        setEditingEquipment(null);
+        setEquipmentForm({ name: '', description: '', status: 'available', booking_price: '25' });
         fetchEquipments();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add equipment.');
+      toast.error(error.response?.data?.message || (editingEquipment ? 'Failed to update equipment.' : 'Failed to add equipment.'));
     }
+  };
+
+  const handleEditEquipment = (equipment) => {
+    setEditingEquipment(equipment);
+    setEquipmentForm({
+      name: equipment.name || '',
+      description: equipment.description || '',
+      status: equipment.status || 'available',
+      booking_price: String(equipment.booking_price ?? 25)
+    });
   };
 
   const handleDeleteEquipment = async (id) => {
@@ -284,6 +305,8 @@ function AdminManagement() {
                 onClick={() => {
                   setActiveTab(tab.id);
                   setEditingSub(null);
+                  setEditingEquipment(null);
+                  setEquipmentForm({ name: '', description: '', status: 'available', booking_price: '25' });
                   setSubForm({ name: '', price: '', duration_days: '30', description: '', has_trainer: false, has_nutritionist: false, plan_type: 'both' });
                 }}
                 className="btn px-4 py-2.5 fw-bold text-uppercase d-flex align-items-center gap-2 hover-lift"
@@ -330,9 +353,18 @@ function AdminManagement() {
                       <div key={eq.id || idx} className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'rgba(25,25,25,0.4)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px' }}>
                         <div>
                           <strong className="text-white d-block">{eq.name}</strong>
-                          <span className="text-secondary small d-block mt-0.5" style={{ fontSize: '0.75rem' }}>Status: <span className="text-warning">{eq.status}</span></span>
+                          <span className="text-secondary small d-block mt-0.5" style={{ fontSize: '0.75rem' }}>Status: <span className="text-warning">{eq.status}</span> | ${Number(eq.booking_price || 0).toFixed(2)} / hr</span>
                         </div>
-                        <button onClick={() => handleDeleteEquipment(eq.id)} className="btn btn-link text-danger p-2 hover-lift"><Trash2 size={16} /></button>
+                        <div className="d-flex align-items-center gap-2">
+                          <button
+                            onClick={() => handleEditEquipment(eq)}
+                            className="btn btn-sm btn-outline-warning py-1 px-2.5 fw-bold text-uppercase"
+                            style={{ fontSize: '0.65rem', borderRadius: '6px' }}
+                          >
+                            Edit
+                          </button>
+                          <button onClick={() => handleDeleteEquipment(eq.id)} className="btn btn-link text-danger p-2 hover-lift"><Trash2 size={16} /></button>
+                        </div>
                       </div>
                     ))
                   )
@@ -421,7 +453,7 @@ function AdminManagement() {
               }}
             >
               <h3 className="fw-black text-warning mb-4 fs-5 text-uppercase" style={{ letterSpacing: '1px' }}>
-                {editingSub ? 'Edit Subscription Plan' : 'Quick Register Form'}
+                {editingSub ? 'Edit Subscription Plan' : editingEquipment ? 'Edit Machine' : 'Quick Register Form'}
               </h3>
 
               {/* Equipment Form */}
@@ -448,9 +480,48 @@ function AdminManagement() {
                       className="form-control text-white bg-black bg-opacity-40 border border-secondary border-opacity-25"
                     />
                   </div>
-                  <button type="submit" className="btn btn-warning mt-3 fw-bold text-uppercase py-2" style={{ background: 'linear-gradient(135deg, #ff7a00 0%, #ff4400 100%)', border: 'none', color: '#000' }}>
-                    Register Machine
-                  </button>
+                  <div className="row g-2">
+                    <div className="col-6">
+                      <label className="text-secondary small fw-bold text-uppercase mb-2 d-block">Status</label>
+                      <select
+                        value={equipmentForm.status}
+                        onChange={(e) => setEquipmentForm({ ...equipmentForm, status: e.target.value })}
+                        className="form-control text-white bg-black bg-opacity-40 border border-secondary border-opacity-25"
+                      >
+                        <option value="available">Available</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="busy">In Use</option>
+                      </select>
+                    </div>
+                    <div className="col-6">
+                      <label className="text-secondary small fw-bold text-uppercase mb-2 d-block">Booking Price / hr</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={equipmentForm.booking_price}
+                        onChange={(e) => setEquipmentForm({ ...equipmentForm, booking_price: e.target.value })}
+                        className="form-control text-white bg-black bg-opacity-40 border border-secondary border-opacity-25"
+                      />
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2 mt-3">
+                    <button type="submit" className="btn btn-warning flex-grow-1 fw-bold text-uppercase py-2" style={{ background: 'linear-gradient(135deg, #ff7a00 0%, #ff4400 100%)', border: 'none', color: '#000' }}>
+                      {editingEquipment ? 'Update Machine' : 'Register Machine'}
+                    </button>
+                    {editingEquipment && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingEquipment(null);
+                          setEquipmentForm({ name: '', description: '', status: 'available', booking_price: '25' });
+                        }}
+                        className="btn btn-outline-secondary fw-bold text-uppercase py-2"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </form>
               )}
 

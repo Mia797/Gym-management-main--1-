@@ -21,7 +21,7 @@ function Dashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const response = await getAdminDashboard();
+      const response = await getAdminDashboard(user);
       if (response.data) {
         setDashboardData(response.data);
       }
