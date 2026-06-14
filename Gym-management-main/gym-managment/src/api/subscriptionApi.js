@@ -15,15 +15,10 @@ export const getSubscriptions = () => api.get('/subscriptions');
 export const purchaseSubscription = (payload, user) =>
   api.post('/subscriptions/purchase', payload, userHeaders(user));
 
-<<<<<<< HEAD
-// Get the logged‑in user's subscriptions with status
-export const getUserSubscriptions = () => api.get('/subscriptions/user');
+// Get the logged-in user's subscriptions with status
+export const getUserSubscriptions = (user) =>
+  api.get('/subscriptions/user', userHeaders(user));
 
 // Admin: create a new subscription plan
 export const createSubscriptionPlan = (payload) =>
   api.post('/subscriptions/create', payload);
-=======
-// Get the logged-in user's subscriptions with status
-export const getUserSubscriptions = (user) =>
-  api.get('/subscriptions/user', userHeaders(user));
->>>>>>> dbe9df97612276bd84439ba8c6714786c376ab20
