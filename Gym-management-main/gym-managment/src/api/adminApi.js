@@ -58,5 +58,4 @@ export const deleteNutritionist = (userId) =>
 export const deleteUser = (userId) =>
   api.post('/auth/delete-user', {
     user_id: Number(userId),
-    userId: Number(userId),
   });

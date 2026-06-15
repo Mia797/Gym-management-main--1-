@@ -20,7 +20,9 @@ app.use((req, res, next) => {
 // In‑memory store for demo purposes
 const users = [
   { id: 1, name: 'Demo User', email: 'user@goldfit.local', password: 'password', balance: 500, role: 'user', createdAt: new Date() },
-  { id: 2, name: 'Admin User', email: 'admin@goldfit.local', password: 'password', balance: 0, role: 'admin', createdAt: new Date() }
+  { id: 2, name: 'Admin User', email: 'admin@goldfit.local', password: 'password', balance: 0, role: 'admin', createdAt: new Date() },
+  { id: 3, name: 'Trainer John', email: 'trainer@goldfit.local', password: 'password', balance: 0, role: 'trainer', createdAt: new Date() },
+  { id: 4, name: 'Nutritionist Sarah', email: 'nutritionist@goldfit.local', password: 'password', balance: 0, role: 'nutritionist', createdAt: new Date() }
 ];
 let specialistProfile = {
   bio: 'Certified specialist in high-performance programs.',
@@ -79,9 +81,27 @@ app.get('/api/specialists/dashboard', (req, res) => {
     earnings: 1850,
     specialist_profile: specialistProfile,
     client_plans: [
-      { id: 1, clientName: 'Alice Johnson', status: 'Planning' },
-      { id: 2, clientName: 'Bob Williams', status: 'Active' },
-      { id: 3, clientName: 'Charlie Brown', status: 'Planning' }
+      { 
+        id: 1, 
+        user_name: 'Alice Johnson', 
+        user_email: 'alice@goldfit.local', 
+        plan_id: 1, 
+        status: 'Planning' 
+      },
+      { 
+        id: 2, 
+        user_name: 'Bob Williams', 
+        user_email: 'bob@goldfit.local', 
+        plan_id: 2, 
+        status: 'Active' 
+      },
+      { 
+        id: 3, 
+        user_name: 'Charlie Brown', 
+        user_email: 'charlie@goldfit.local', 
+        plan_id: 3, 
+        status: 'Planning' 
+      }
     ]
   });
 });
