@@ -37,7 +37,7 @@ function AdminManagement() {
   const [editingSub, setEditingSub] = useState(null);
   const [specForm, setSpecForm] = useState({ name: '', email: '', password: '', role_name: 'trainer', phone: '', bio: '' });
   const [deleteUserId, setDeleteUserId] = useState('');
-
+  const [users, setUsers] = useState([]);
   // Fetch functions
   const fetchEquipments = async () => {
     setLoading(true);
@@ -87,18 +87,42 @@ function AdminManagement() {
     }
   };
 
-  useEffect(() => {
-    if (user && user.role === 'admin') {
-      if (activeTab === 'equipment') fetchEquipments();
-      if (activeTab === 'packages') fetchSubscriptions();
-      if (activeTab === 'specialists') fetchSpecialists();
-    }
-  }, [user, activeTab]);
+useEffect(() => {
+  if (!user || user.role !== 'admin') return;
+
+  const loadData = async () => {
+    if (activeTab === 'equipment') await fetchEquipments();
+    if (activeTab === 'packages') await fetchSubscriptions();
+    if (activeTab === 'specialists') await fetchSpecialists();
+    if (activeTab === 'users') await fetchUsers();
+  };
+
+  loadData();
+}, [user, activeTab]);
 
   if (!user || user.role !== 'admin') {
     return <Navigate to="/" />;
   }
+const fetchUsers = async () => {
+  setLoading(true);
+  try {
+    const res = await axios.get('/api/users');
+    const result = res.data;
 
+    const safeUsers = Array.isArray(result)
+      ? result
+      : Object.values(result || {}).filter(v => typeof v === 'object' && v?.id);
+
+    console.log("SAFE USERS:", safeUsers);
+
+    setUsers(safeUsers);
+  } catch (e) {
+    toast.error('Failed to fetch users');
+    setUsers([]);
+  } finally {
+    setLoading(false);
+  }
+};
   // Handle submits
   const handleAddEquipment = async (e) => {
     e.preventDefault();
@@ -430,17 +454,69 @@ function AdminManagement() {
 
                 {/* Users List Information */}
                 {activeTab === 'users' && (
-                  <div className="p-4 text-center rounded-4" style={{ background: 'rgba(20,20,20,0.5)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <Shield size={32} className="text-warning mb-3" />
-                    <p className="text-secondary small mb-0">Use the User Accounts control form on the right to remove a registered member from the database by specifying their Account ID.</p>
-                  </div>
-                )}
+  users.length === 0 ? (
+    <div className="text-center py-4 text-secondary">
+      No users found
+    </div>
+  ) : (
+users.map((u) => (
+  <div
+    key={u.id}
+    className="p-3 d-flex justify-content-between align-items-center"
+    style={{
+      background: 'rgba(25,25,25,0.4)',
+      border: '1px solid rgba(255,255,255,0.05)',
+      borderRadius: '10px'
+    }}
+  >
+    <div>
+      <strong className="text-white d-block">
+        {u.name}
+      </strong>
 
-              </div>
-            )}
-          </div>
+      <span className="text-secondary small d-block">
+        Email: {u.email}
+      </span>
 
-          {/* Form Actions (Right Pane) */}
+      <span className="text-info small d-block">
+        ID: {u.id}
+      </span>
+
+      <span className="text-success small d-block">
+        Phone: {u.phone || 'N/A'}
+      </span>
+
+      <span className="text-warning small d-block text-uppercase">
+        Role: {u.role_name || u.role}
+      </span>
+    </div>
+
+    <div className="d-flex gap-2">
+      <button
+        className="btn btn-outline-warning btn-sm"
+        onClick={() => {
+          // open edit modal
+        }}
+      >
+        Edit
+      </button>
+
+      <button
+        className="btn btn-danger btn-sm"
+        onClick={() => handleDeleteUser(u.id)}
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+))
+  )
+)}
+</div>
+)}
+</div>
+
+{/* Form Actions (Right Pane) */}
           <div className="col-12 col-lg-5">
             <div 
               className="p-4"
