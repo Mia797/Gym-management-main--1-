@@ -1,0 +1,139 @@
+.machines-container {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at center, var(--bg-dark-800) 0%, var(--bg-dark-900) 100%);
+}
+
+.machines-container::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle at 30% 70%, rgba(255, 122, 0, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(255, 61, 0, 0.05) 0%, transparent 50%);
+  animation: rotate-bg 25s linear infinite reverse;
+  z-index: 0;
+}
+
+@keyframes rotate-bg {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.machines-content {
+  position: relative;
+  z-index: 1;
+  padding: 120px 20px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.machine-card {
+  background: rgba(20, 20, 20, 0.6) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  position: relative;
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.machine-card::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.2), transparent, rgba(255, 61, 0, 0.1));
+  z-index: -1;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.machine-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255, 122, 0, 0.3) !important;
+  box-shadow: 0 25px 50px -12px rgba(255, 122, 0, 0.2);
+}
+
+.machine-card:hover::after {
+  opacity: 1;
+}
+
+.machine-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+}
+
+.machine-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  filter: brightness(0.6) contrast(1.1);
+}
+
+.machine-card:hover .machine-img {
+  transform: scale(1.08);
+  filter: brightness(0.9) contrast(1.1);
+}
+
+.machine-img-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(to top, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.8) 40%, transparent 100%);
+  pointer-events: none;
+}
+
+.machine-info {
+  padding: 0 24px 24px;
+  position: relative;
+  z-index: 2;
+  margin-top: -30px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+.machine-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  color: white;
+  margin-bottom: 4px;
+  font-size: 1.6rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.machine-zone {
+  color: var(--accent-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.machines-header-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}

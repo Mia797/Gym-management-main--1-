@@ -1,0 +1,111 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 100px 20px;
+}
+
+/* Dynamic Background Effect */
+.register-container::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle at 70% 30%, rgba(255, 122, 0, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 30% 70%, rgba(255, 61, 0, 0.05) 0%, transparent 50%);
+  animation: rotate-bg-register 20s linear infinite reverse;
+  z-index: 0;
+}
+
+@keyframes rotate-bg-register {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.register-card {
+  background: rgba(20, 20, 20, 0.6) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+  max-width: 500px;
+  width: 100%;
+  border-top: 1px solid rgba(255, 122, 0, 0.2) !important;
+}
+
+.register-card::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.2), transparent, rgba(255, 61, 0, 0.1));
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.form-control-dark {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  padding: 12px 18px 12px 45px !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  width: 100%;
+}
+
+.form-control-dark:focus {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.1) !important;
+}
+
+.input-icon-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.form-control-dark:focus + .input-icon,
+.input-icon-wrapper:focus-within .input-icon {
+  color: var(--accent-primary);
+}
+
+.btn-register {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+  border: none !important;
+  color: black !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  transition: all 0.3s !important;
+  font-size: 0.9rem !important;
+  width: 100%;
+}
+
+.btn-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(255, 122, 0, 0.4);
+}
