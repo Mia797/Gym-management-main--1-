@@ -164,7 +164,7 @@ function Machines() {
                         <p className={`machine-zone mb-1 fw-bold ${item.status === 'available' ? 'text-success' : 'text-danger'}`}>
                           {item.status === 'available' ? 'Available' : 'In Use'}
                         </p>
-                        <p className="text-muted small mb-0">${(parseFloat(item.booking_price || 0) * 5).toFixed(0)}  Tokens/ hr</p>
+                        <p className="text-muted small mb-0">{(parseFloat(item.booking_price || 0) * 5).toFixed(0)}  Tokens/ hr</p>
                       </div>
                       <button
                         className="btn-premium"

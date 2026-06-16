@@ -384,7 +384,7 @@ function Profile() {
             <div>
               <p className="profile-detail-label">Wallet Balance</p>
               <div className="d-flex align-items-center gap-2">
-                <p className="profile-detail-value mb-0">${parseFloat(user.balance || 0).toFixed(2)}</p>
+                <p className="profile-detail-value mb-0">{parseFloat(user.balance || 0).toFixed(0)} 🪙 Tokens</p>
                 <button 
                   onClick={() => navigate('/wallet')} 
                   className="btn-fund-small"
