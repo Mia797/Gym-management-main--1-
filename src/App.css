@@ -1,0 +1,107 @@
+/* #root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+} */
+/* body{
+  background-color:rgb(33, 37, 41);
+} */
+/* Main background */
+/* body {
+  background: radial-gradient(circle at top, #1a0a00, #000000);
+  color: #ffffff;
+  font-family: "Segoe UI", sans-serif;
+} */
+
+/* Navbar */
+.navbar {
+  background: transparent !important;
+}
+
+.navbar .nav-link,
+.navbar-brand {
+  color: #ffffff !important;
+}
+
+.navbar .nav-link:hover {
+  color: #ff7a00 !important;
+}
+
+/* Cards */
+.product-card {
+  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+  border: none;
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(255, 122, 0, 0.2);
+}
+
+/* Product title */
+.product-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Price */
+.product-price {
+  color: #888888;
+}
+
+/* Gradient button */
+.btn-gradient {
+  background: linear-gradient(90deg, #ff7a00, #ff2b2b);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.btn-gradient:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}

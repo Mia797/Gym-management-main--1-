@@ -1,0 +1,387 @@
+/* Home.css */
+.home-container {
+  min-height: 100vh;
+  background-color: var(--bg-dark-900);
+  overflow-x: hidden;
+}
+
+/* Dynamic Hero Section */
+.hero-epic {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 10%;
+  overflow: hidden;
+  background: var(--bg-dark-900);
+}
+
+.hero-epic-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center 20%;
+  transform: scale(1);
+  animation: hero-zoom 30s infinite alternate linear;
+  z-index: 1;
+}
+
+@keyframes hero-zoom {
+  0% { transform: scale(1); filter: brightness(0.4) saturate(1); }
+  100% { transform: scale(1.1); filter: brightness(0.3) saturate(1.2); }
+}
+
+.hero-epic-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--bg-dark-900) 0%, rgba(5,5,5,0.8) 40%, transparent 100%);
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  max-width: 800px;
+}
+
+.hero-title-main {
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  color: #fff;
+  margin-bottom: 20px;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 500px;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+/* Feature Marquee */
+.marquee-container {
+  background: var(--accent-primary);
+  padding: 15px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  transform: skewY(-2deg);
+  margin-top: -30px;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(255, 122, 0, 0.3);
+}
+
+.marquee-content {
+  display: flex;
+  animation: marquee 20s linear infinite;
+}
+
+.marquee-item {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000;
+  margin: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Dynamic Grids */
+.section-padding {
+  padding: 120px 0;
+}
+
+.section-header-centered {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.display-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+/* Feature Cards */
+.feature-glass-card {
+  background: rgba(25, 25, 25, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 40px 30px;
+  transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.feature-glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 122, 0, 0.1), transparent);
+  transition: all 0.6s ease;
+}
+
+.feature-glass-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255, 122, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 122, 0, 0.1);
+}
+
+.feature-glass-card:hover::before {
+  left: 100%;
+}
+
+.feature-icon-box {
+  width: 70px;
+  height: 70px;
+  background: rgba(255, 122, 0, 0.1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+  margin-bottom: 25px;
+  border: 1px solid rgba(255, 122, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-glass-card:hover .feature-icon-box {
+  background: var(--accent-primary);
+  color: #000;
+  transform: scale(1.1) rotate(5deg);
+}
+
+.feature-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.feature-desc {
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Quick Access Cards */
+.quick-access-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  height: 400px;
+  cursor: pointer;
+}
+
+.quick-access-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+  filter: grayscale(40%) brightness(0.6);
+}
+
+.quick-access-card:hover .quick-access-img {
+  transform: scale(1.1);
+  filter: grayscale(0%) brightness(0.8);
+}
+
+.quick-access-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.quick-access-title {
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 10px;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  opacity: 0.9;
+}
+
+.quick-access-card:hover .quick-access-title {
+  transform: translateY(0);
+  opacity: 1;
+  color: var(--accent-primary);
+}
+
+.quick-access-desc {
+  color: rgba(255,255,255,0.7);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.4s ease 0.1s;
+}
+
+.quick-access-card:hover .quick-access-desc {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .hero-title-main { font-size: 3.5rem; }
+  .display-title { font-size: 2.5rem; }
+  .hero-epic { padding-left: 20px; padding-right: 20px; }
+}
+
+/* Premium Badge styling */
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 24px;
+  background: rgba(255, 122, 0, 0.1);
+  border: 1px solid var(--accent-primary);
+  border-radius: 50px;
+  color: var(--accent-primary);
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px rgba(255, 122, 0, 0.2), inset 0 0 10px rgba(255, 122, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 0 8px rgba(255, 122, 0, 0.6);
+}
+
+.premium-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 100%; }
+  100% { left: 100%; }
+}
+
+/* Ecosystem / Platform Functionalities */
+.ecosystem-section {
+  background: var(--bg-dark-800);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.ecosystem-card {
+  background: rgba(25, 25, 25, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 45px 35px;
+  transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ecosystem-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 122, 0, 0.08), transparent);
+  transition: all 0.6s ease;
+}
+
+.ecosystem-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255, 122, 0, 0.35);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 122, 0, 0.08);
+}
+
+.ecosystem-card:hover::before {
+  left: 100%;
+}
+
+.ecosystem-number {
+  position: absolute;
+  right: 25px;
+  top: 15px;
+  font-size: 5.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.02);
+  transition: all 0.4s ease;
+  user-select: none;
+}
+
+.ecosystem-card:hover .ecosystem-number {
+  color: rgba(255, 122, 0, 0.06);
+  transform: scale(1.05) translateY(-5px);
+}
+
+.ecosystem-badge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: rgba(255, 122, 0, 0.08);
+  padding: 5px 14px;
+  border-radius: 6px;
+  width: fit-content;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255, 122, 0, 0.15);
+}
+
+.ecosystem-card-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ecosystem-card-desc {
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
